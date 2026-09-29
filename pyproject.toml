@@ -1,0 +1,10 @@
+[project]
+name = "fine-tuning"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "peft>=0.21.0",
+    "transformers[torch]>=5.17.0",
+]
