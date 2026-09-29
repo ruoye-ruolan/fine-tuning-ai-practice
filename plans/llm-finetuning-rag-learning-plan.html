@@ -109,7 +109,7 @@
   .phase.tc .ship .lbl{color:var(--c-ink)}
   .phase.sh .ship .lbl{color:#4C5762}
   .mats{margin-top:16px;border-top:1px dotted #C9D3DC;padding-top:12px}
-  .mats .lbl{font-family:'Times New Roman',Times,serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+  .mats .lbl{margin-top:0;font-weight:normal;font-family:'Times New Roman',Times,serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
   .mats ul{list-style:none;margin:0}
   .mats li{display:flex;gap:12px;align-items:baseline;margin:7px 0;font-size:14.5px}
   .mats .verb{font-family:'Times New Roman',Times,serif;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#7B8794;flex:none;width:50px;text-align:right}
@@ -334,7 +334,7 @@
         <li>The Hugging Face stack: <code>transformers</code>, <code>datasets</code>, <code>tokenizers</code>; loading a small model and watching what the tokenizer actually does to your text.</li>
       </ul>
       <div class="ship"><span class="lbl">Ship →</span>A notebook that loads a small open model (Qwen3.5 0.8B or Gemma 4 E2B), inspects its tokenizer on tricky inputs, generates with three sampling settings, and logs VRAM use for each. Already fluent? Pass this in one sitting and move on.</div>
-      <div class="mats"><span class="lbl">Materials</span>
+      <div class="mats"><h4 class="lbl">ckpt-00 materials</h4>
         <ul>
           <li><span class="verb">watch</span><span class="mb"><a href="https://www.youtube.com/watch?v=kCc8FmEb1nY">Karpathy — "Let's build GPT: from scratch"</a> <span class="note">— the best two hours on what a transformer actually computes</span></span></li>
           <li><span class="verb">watch</span><span class="mb"><a href="https://www.3blue1brown.com/lessons/attention">3Blue1Brown — Attention in transformers</a> <span class="note">— visual intuition before any code</span></span></li>
@@ -362,7 +362,7 @@
         <li>TRL's <code>SFTTrainer</code> end to end: packing, effective batch size via gradient accumulation, checkpoint saving and resuming.</li>
       </ul>
       <div class="ship"><span class="lbl">Ship →</span>Your golden set, committed before the first training run. Then an SFT run on a 0.6–2B <em>base</em> checkpoint (Qwen3 1.7B-Base is the safe default; pick a family that ships pre-trained weights, since teaching a base model to follow instructions is the point) over 1–5k instruction pairs (a Dolly-15k subset, or pairs you wrote for a task you care about). Score base vs. tuned on the golden set and record the diff in your lab notebook.</div>
-      <div class="mats"><span class="lbl">Materials</span>
+      <div class="mats"><h4 class="lbl">ckpt-01 materials</h4>
         <ul>
           <li><span class="verb">work</span><span class="mb"><a href="https://huggingface.co/learn/llm-course/chapter3/1">HF LLM Course, ch. 3 — fine-tuning</a> <span class="note">— the training loop end to end</span></span></li>
           <li><span class="verb">read</span><span class="mb"><a href="https://huggingface.co/docs/trl/sft_trainer">TRL SFTTrainer guide</a> <span class="note">— packing, completion-only loss, the knobs you'll actually turn</span></span></li>
@@ -391,7 +391,7 @@
         <li>Licensing before publishing: Qwen3.5 and Gemma 4 are Apache-2.0; Llama ships custom terms with naming and attribution rules for derivatives. Check before you push a merged model anywhere public.</li>
       </ul>
       <div class="ship"><span class="lbl">Ship →</span>A QLoRA fine-tune of a 7–9B model (Qwen3.5 9B is the September 2026 default; Qwen3 8B or Llama 3.1 8B if you want the beaten path) on a domain dataset. Merge the adapter, export to GGUF, and serve it locally through Ollama so someone else could pull and run your model — carrying the chat template and stop tokens into the Modelfile, then re-running your ckpt-01 tricky prompts to prove the served model behaves like the trained one; a training/serving template mismatch is the classic silent failure. Quietly, this is also your first rep of Track C.</div>
-      <div class="mats"><span class="lbl">Materials</span>
+      <div class="mats"><h4 class="lbl">ckpt-02 materials</h4>
         <ul>
           <li><span class="verb">read</span><span class="mb"><a href="https://arxiv.org/abs/2106.09685">LoRA paper</a> <span class="note">— §1–4 suffice; the idea fits on a napkin</span></span></li>
           <li><span class="verb">read</span><span class="mb"><a href="https://arxiv.org/abs/2305.14314">QLoRA paper</a> <span class="note">— focus on NF4 and paged optimizers</span></span></li>
@@ -418,7 +418,7 @@
         <li>Evaluation beyond loss curves: <code>lm-evaluation-harness</code> for standard benchmarks; LLM-as-judge and its biases (position, verbosity); and your ckpt-01 golden set, which matters more than any leaderboard.</li>
       </ul>
       <div class="ship"><span class="lbl">Ship →</span>A DPO pass on top of your ckpt-02 model using a preference dataset (an UltraFeedback subset works). Then an eval report: base vs. SFT (ckpt-02) vs. DPO on the golden set you wrote in ckpt-01, with a judge prompt, including the cases where DPO made things worse. Optional but recommended: one short GRPO run on a task with a programmatic reward, to feel the difference.</div>
-      <div class="mats"><span class="lbl">Materials</span>
+      <div class="mats"><h4 class="lbl">ckpt-03 materials</h4>
         <ul>
           <li><span class="verb">read</span><span class="mb"><a href="https://arxiv.org/abs/2305.18290">DPO paper</a> <span class="note">— the trick: your language model is secretly a reward model</span></span></li>
           <li><span class="verb">work</span><span class="mb"><a href="https://huggingface.co/docs/trl/dpo_trainer">TRL DPOTrainer</a> <span class="note">— beta, reference models, the training loop</span></span></li>
@@ -449,7 +449,7 @@
         <li>The naive pipeline — ingest → chunk → embed → top-k → stuff context → generate with citations — and its classic failure modes: wrong chunks, lost context, confident answers with no support.</li>
       </ul>
       <div class="ship"><span class="lbl">Ship →</span>A from-scratch RAG CLI over your own PDFs or notes: <code>sentence-transformers</code> + FAISS + any chat model (your ckpt-02 model in Ollama closes the loop). Then rebuild the same tool in LlamaIndex and write down what the framework was hiding from you.</div>
-      <div class="mats"><span class="lbl">Materials</span>
+      <div class="mats"><h4 class="lbl">ckpt-04 materials</h4>
         <ul>
           <li><span class="verb">skim</span><span class="mb"><a href="https://arxiv.org/abs/2005.11401">Lewis et al. — the original RAG paper</a> <span class="note">— for framing; the field moved, the shape didn't</span></span></li>
           <li><span class="verb">work</span><span class="mb"><a href="https://sbert.net">sentence-transformers quickstart</a> <span class="note">— embed and compare in ten lines; pick your model off the <a href="https://huggingface.co/spaces/mteb/leaderboard">MTEB leaderboard</a></span></span></li>
@@ -477,7 +477,7 @@
         <li>RAG evaluation: faithfulness, answer relevancy, context precision and recall in the RAGAS style; building a 30–50 question golden set; a sober look at when GraphRAG or agentic retrieval earns its complexity.</li>
       </ul>
       <div class="ship"><span class="lbl">Ship →</span>Your ckpt-04 system upgraded with hybrid search + a reranker, an eval harness over your golden set, and a before/after table quantifying the lift. If a fancy technique doesn't move your numbers, the notebook says so.</div>
-      <div class="mats"><span class="lbl">Materials</span>
+      <div class="mats"><h4 class="lbl">ckpt-05 materials</h4>
         <ul>
           <li><span class="verb">read</span><span class="mb"><a href="https://www.anthropic.com/news/contextual-retrieval">Anthropic — Introducing Contextual Retrieval</a> <span class="note">— with failure-rate numbers to beat</span></span></li>
           <li><span class="verb">read</span><span class="mb"><a href="https://weaviate.io/blog/hybrid-search-explained">Weaviate — Hybrid search explained</a> <span class="note">— BM25 + dense + reciprocal rank fusion</span></span></li>
@@ -505,7 +505,7 @@
         <li>Ops before users arrive: load testing your endpoint, autoscaling and cold starts, rate limits and basic guardrails.</li>
       </ul>
       <div class="ship"><span class="lbl">Ship →</span>Deploy your ckpt-03 model twice. Local: GGUF through llama.cpp / Ollama. Production: vLLM or SGLang behind a Dockerized, OpenAI-compatible streaming endpoint on a serverless GPU platform. Load-test both and publish the table — TTFT, tokens/s, and $/1M tokens at three quantization levels: on a 16 GB card that means INT4 (AWQ/GPTQ) and FP8 locally, with the unquantized bf16 baseline measured on the rented or serverless GPU.</div>
-      <div class="mats"><span class="lbl">Materials</span>
+      <div class="mats"><h4 class="lbl">ckpt-06 materials</h4>
         <ul>
           <li><span class="verb">work</span><span class="mb"><a href="https://docs.vllm.ai">vLLM docs</a> <span class="note">— quickstart plus the OpenAI-compatible server; your production default</span></span></li>
           <li><span class="verb">read</span><span class="mb"><a href="https://www.databricks.com/blog/llm-inference-performance-engineering-best-practices">Databricks — LLM Inference Performance Engineering</a> <span class="note">— TTFT, inter-token latency, and batching, with numbers</span></span></li>
@@ -532,7 +532,7 @@
         <li>Production hygiene: response caching, guardrails — including prompt-injection defenses for anything your retriever feeds the model — monitoring for drift, and a plan for re-indexing when the corpus updates.</li>
       </ul>
       <div class="ship"><span class="lbl">Ship →</span>The capstone: a domain assistant for a corpus you care about — your ckpt-03 model on your ckpt-06 serving stack, your ckpt-05 retrieval pipeline behind a FastAPI endpoint, the eval suite in CI, and a one-page report covering quality <em>and</em> latency/cost. This repo is the portfolio piece.</div>
-      <div class="mats"><span class="lbl">Materials</span>
+      <div class="mats"><h4 class="lbl">ckpt-07 materials</h4>
         <ul>
           <li><span class="verb">read</span><span class="mb"><a href="https://huyenchip.com/books/">Huyen — AI Engineering</a> <span class="note">— especially the evaluation and inference chapters</span></span></li>
           <li><span class="verb">read</span><span class="mb"><a href="https://eugeneyan.com/writing/llm-patterns/">Yan — Patterns for LLM Systems &amp; Products</a> <span class="note">— evals, RAG, and guardrails in one map</span></span></li>

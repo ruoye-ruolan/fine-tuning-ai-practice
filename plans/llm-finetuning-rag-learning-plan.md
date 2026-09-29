@@ -1,5 +1,7 @@
 # Fine-Tuning, Retrieval-Augmented Generation & Deployment
 
+<!-- markdownlint-disable MD013 -->
+
 *cs.LG · self-study curriculum · rev 1.2 — sep 2026*  
 A 16-week practitioner's plan · three tracks · eight checkpoints · ≈ 8–10 h / week
 
@@ -10,7 +12,7 @@ A 16-week practitioner's plan · three tracks · eight checkpoints · ≈ 8–10
 ## Timeline
 
 | Weeks | Checkpoint | Track | You ship |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | 0–1 | ckpt-00 | shared | Foundations notebook |
 | 1–3 | ckpt-01 | A | Golden set, then an SFT run scored against it |
 | 3–5 | ckpt-02 | A | QLoRA on a 7–9B model → merged GGUF → served in Ollama |
@@ -48,7 +50,7 @@ Change what a model *costs to run*: the same weights can stream in 200 ms or cra
 - **Refresh the model pick.** The checkpoints below name specific models; they are the September 2026 defaults, not permanent ones. The open-weight lineup turns over every few months, so re-check the pick the day each checkpoint starts — and prefer a family with an Apache-2.0 license and both base and instruct checkpoints.
 
 | Hardware you have | What it handles in this plan |
-|---|---|
+| --- | --- |
 | No GPU (laptop only) | All of Track B — RAG runs fine on CPU with API or local quantized models — plus the llama.cpp / Ollama half of Track C, and every reading week. |
 | Colab free / Kaggle (T4 16 GB) | ckpt-01 SFT on 0.5–2B models; ckpt-02 QLoRA on 7–9B models at short context. Enough for the whole plan, with patience. |
 | Colab Pro (L4 / A100) | Comfortable QLoRA and DPO on 7–9B, longer context, faster iterations. |
@@ -70,7 +72,7 @@ Change what a model *costs to run*: the same weights can stream in 200 ms or cra
 
 **Ship →** A notebook that loads a small open model (Qwen3.5 0.8B or Gemma 4 E2B), inspects its tokenizer on tricky inputs, generates with three sampling settings, and logs VRAM use for each. Already fluent? Pass this in one sitting and move on.
 
-**Materials**
+#### ckpt-00 materials
 
 - **watch** · [Karpathy — "Let's build GPT: from scratch"](https://www.youtube.com/watch?v=kCc8FmEb1nY) — the best two hours on what a transformer actually computes
 - **watch** · [3Blue1Brown — Attention in transformers](https://www.3blue1brown.com/lessons/attention) — visual intuition before any code
@@ -91,7 +93,7 @@ Change what a model *costs to run*: the same weights can stream in 200 ms or cra
 
 **Ship →** Your golden set, committed before the first training run. Then an SFT run on a 0.6–2B *base* checkpoint (Qwen3 1.7B-Base is the safe default; pick a family that ships pre-trained weights, since teaching a base model to follow instructions is the point) over 1–5k instruction pairs (a Dolly-15k subset, or pairs you wrote for a task you care about). Score base vs. tuned on the golden set and record the diff in your lab notebook.
 
-**Materials**
+#### ckpt-01 materials
 
 - **work** · [HF LLM Course, ch. 3 — fine-tuning](https://huggingface.co/learn/llm-course/chapter3/1) — the training loop end to end
 - **read** · [TRL SFTTrainer guide](https://huggingface.co/docs/trl/sft_trainer) — packing, completion-only loss, the knobs you'll actually turn
@@ -113,7 +115,7 @@ Change what a model *costs to run*: the same weights can stream in 200 ms or cra
 
 **Ship →** A QLoRA fine-tune of a 7–9B model (Qwen3.5 9B is the September 2026 default; Qwen3 8B or Llama 3.1 8B if you want the beaten path) on a domain dataset. Merge the adapter, export to GGUF, and serve it locally through Ollama so someone else could pull and run your model — carrying the chat template and stop tokens into the Modelfile, then re-running your ckpt-01 tricky prompts to prove the served model behaves like the trained one; a training/serving template mismatch is the classic silent failure. Quietly, this is also your first rep of Track C.
 
-**Materials**
+#### ckpt-02 materials
 
 - **read** · [LoRA paper](https://arxiv.org/abs/2106.09685) — §1–4 suffice; the idea fits on a napkin
 - **read** · [QLoRA paper](https://arxiv.org/abs/2305.14314) — focus on NF4 and paged optimizers
@@ -133,7 +135,7 @@ Change what a model *costs to run*: the same weights can stream in 200 ms or cra
 
 **Ship →** A DPO pass on top of your ckpt-02 model using a preference dataset (an UltraFeedback subset works). Then an eval report: base vs. SFT (ckpt-02) vs. DPO on the golden set you wrote in ckpt-01, with a judge prompt, including the cases where DPO made things worse. Optional but recommended: one short GRPO run on a task with a programmatic reward, to feel the difference.
 
-**Materials**
+#### ckpt-03 materials
 
 - **read** · [DPO paper](https://arxiv.org/abs/2305.18290) — the trick: your language model is secretly a reward model
 - **work** · [TRL DPOTrainer](https://huggingface.co/docs/trl/dpo_trainer) — beta, reference models, the training loop
@@ -157,7 +159,7 @@ Change what a model *costs to run*: the same weights can stream in 200 ms or cra
 
 **Ship →** A from-scratch RAG CLI over your own PDFs or notes: `sentence-transformers` + FAISS + any chat model (your ckpt-02 model in Ollama closes the loop). Then rebuild the same tool in LlamaIndex and write down what the framework was hiding from you.
 
-**Materials**
+#### ckpt-04 materials
 
 - **skim** · [Lewis et al. — the original RAG paper](https://arxiv.org/abs/2005.11401) — for framing; the field moved, the shape didn't
 - **work** · [sentence-transformers quickstart](https://sbert.net) — embed and compare in ten lines; pick your model off the [MTEB leaderboard](https://huggingface.co/spaces/mteb/leaderboard)
@@ -178,7 +180,7 @@ Change what a model *costs to run*: the same weights can stream in 200 ms or cra
 
 **Ship →** Your ckpt-04 system upgraded with hybrid search + a reranker, an eval harness over your golden set, and a before/after table quantifying the lift. If a fancy technique doesn't move your numbers, the notebook says so.
 
-**Materials**
+#### ckpt-05 materials
 
 - **read** · [Anthropic — Introducing Contextual Retrieval](https://www.anthropic.com/news/contextual-retrieval) — with failure-rate numbers to beat
 - **read** · [Weaviate — Hybrid search explained](https://weaviate.io/blog/hybrid-search-explained) — BM25 + dense + reciprocal rank fusion
@@ -199,7 +201,7 @@ Change what a model *costs to run*: the same weights can stream in 200 ms or cra
 
 **Ship →** Deploy your ckpt-03 model twice. Local: GGUF through llama.cpp / Ollama. Production: vLLM or SGLang behind a Dockerized, OpenAI-compatible streaming endpoint on a serverless GPU platform. Load-test both and publish the table — TTFT, tokens/s, and $/1M tokens at three quantization levels: on a 16 GB card that means INT4 (AWQ/GPTQ) and FP8 locally, with the unquantized bf16 baseline measured on the rented or serverless GPU.
 
-**Materials**
+#### ckpt-06 materials
 
 - **work** · [vLLM docs](https://docs.vllm.ai) — quickstart plus the OpenAI-compatible server; your production default
 - **read** · [Databricks — LLM Inference Performance Engineering](https://www.databricks.com/blog/llm-inference-performance-engineering-best-practices) — TTFT, inter-token latency, and batching, with numbers
@@ -219,7 +221,7 @@ Change what a model *costs to run*: the same weights can stream in 200 ms or cra
 
 **Ship →** The capstone: a domain assistant for a corpus you care about — your ckpt-03 model on your ckpt-06 serving stack, your ckpt-05 retrieval pipeline behind a FastAPI endpoint, the eval suite in CI, and a one-page report covering quality *and* latency/cost. This repo is the portfolio piece.
 
-**Materials**
+#### ckpt-07 materials
 
 - **read** · [Huyen — AI Engineering](https://huyenchip.com/books/) — especially the evaluation and inference chapters
 - **read** · [Yan — Patterns for LLM Systems & Products](https://eugeneyan.com/writing/llm-patterns/) — evals, RAG, and guardrails in one map
