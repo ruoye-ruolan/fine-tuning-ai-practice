@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fine-Tuning, RAG &amp; Deployment — A 14-Week Practitioner's Curriculum</title>
+<style>
+  :root{
+    --ink:#141D27;
+    --muted:#5A6673;
+    --line:#D9E1E8;
+    --grid:rgba(31,119,180,.05);
+    --a:#1F77B4;        /* matplotlib C0 — Track A, fine-tuning */
+    --a-ink:#17618F;
+    --a-bg:#EAF3F9;
+    --b:#FF7F0E;        /* matplotlib C1 — Track B, RAG */
+    --b-ink:#B25A05;
+    --b-bg:#FDF3E7;
+    --c:#2CA02C;        /* matplotlib C2 — Track C, deployment */
+    --c-ink:#1E701E;
+    --c-bg:#EAF6EA;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{
+    font-family:'Times New Roman',Times,serif;
+    font-size:16px;line-height:1.55;color:var(--ink);
+    background-color:#FCFDFE;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:26px 26px;
+  }
+  .topline{height:3px;background:linear-gradient(90deg,var(--a) 0 50%,var(--b) 50% 79%,var(--c) 79% 100%)}
+  .wrap{max-width:940px;margin:0 auto;padding:52px 22px 72px}
+  a{color:var(--a-ink);text-decoration-thickness:1px;text-underline-offset:2px}
+  a:hover{color:var(--a)}
+  :focus-visible{outline:2px solid var(--a);outline-offset:2px}
+  .mn{font-family:'Times New Roman',Times,serif}
+
+  /* ---------- header ---------- */
+  .eyebrow{font-family:'Times New Roman',Times,serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  h1{font-family:'Times New Roman',Times,serif;font-weight:600;font-size:clamp(30px,4.6vw,44px);line-height:1.12;letter-spacing:-.005em;margin:14px 0 10px;width:100%;text-align:center}
+  .byline{font-family:'Times New Roman',Times,serif;font-size:12.5px;color:var(--muted);margin-bottom:24px}
+  .abstract{background:#fff;border:1px solid var(--line);border-radius:3px;padding:20px 24px}
+  .abstract p{font-size:15.5px}
+  .abstract .lbl{font-family:'Times New Roman',Times,serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-right:8px}
+  .toc{display:flex;flex-wrap:wrap;gap:8px 20px;margin:18px 2px 0;font-family:'Times New Roman',Times,serif;font-size:12.5px}
+  .toc a{text-decoration:none;border-bottom:1px dotted var(--a-ink)}
+
+  /* ---------- figure ---------- */
+  .figure{margin:34px 0 6px;background:#fff;border:1px solid var(--line);border-radius:3px;padding:18px 16px 6px}
+  .figure svg{display:block;width:100%;height:auto}
+  .figcap{font-family:'Times New Roman',Times,serif;font-size:12px;line-height:1.6;color:var(--muted);padding:10px 6px 12px}
+  .ax{font-family:'Times New Roman',Times,serif;font-size:11px;fill:var(--muted)}
+  .ck{font-family:'Times New Roman',Times,serif;font-size:10px;fill:#5A6673}
+
+  /* ---------- section chrome ---------- */
+  .sec{margin-top:48px}
+  .sec-head{display:flex;align-items:baseline;gap:12px;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:18px}
+  .sec-head h2{font-family:'Times New Roman',Times,serif;font-weight:600;font-size:24px}
+  .sec-no{font-family:'Times New Roman',Times,serif;font-size:12px;color:var(--muted)}
+
+  /* ---------- track cards ---------- */
+  .tracks{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .track{background:#fff;border:1px solid var(--line);border-top:3px solid var(--a);border-radius:3px;padding:18px 20px}
+  .track.b{border-top-color:var(--b)}
+  .track.c{border-top-color:var(--c)}
+  .track h3{font-family:'Times New Roman',Times,serif;font-weight:600;font-size:19px;margin-bottom:6px}
+  .track p{font-size:14.5px;color:#3D4854}
+  .track .mono-tag{font-family:'Times New Roman',Times,serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:8px}
+  .track .mono-tag.ta{color:var(--a-ink)} .track .mono-tag.tb{color:var(--b-ink)} .track .mono-tag.tc{color:var(--c-ink)}
+  .converge{grid-column:1 / -1;background:#fff;border:1px dashed #B9C6D0;border-radius:3px;padding:14px 20px;font-size:14.5px;color:#3D4854}
+  @media (max-width:860px){.tracks{grid-template-columns:1fr}.converge{grid-column:auto}}
+
+  /* ---------- cadence + hardware ---------- */
+  .rules{list-style:none;margin:0 0 20px}
+  .rules li{position:relative;padding-left:20px;margin:8px 0;font-size:15px}
+  .rules li::before{content:"–";position:absolute;left:2px;color:#8B97A3}
+  .hw{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);font-size:14.5px}
+  .hw th{font-family:'Times New Roman',Times,serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px 14px;border-bottom:1px solid var(--line)}
+  .hw td{padding:9px 14px;border-top:1px solid #EAEFF3;vertical-align:top}
+  .hw td:first-child{font-family:'Times New Roman',Times,serif;font-size:13px;white-space:nowrap}
+  @media (max-width:700px){.hw td:first-child{white-space:normal}}
+
+  /* ---------- phase cards ---------- */
+  .phase{background:#fff;border:1px solid var(--line);border-left:3px solid var(--a);border-radius:3px;padding:24px 26px;margin-bottom:16px}
+  .phase.tb{border-left-color:var(--b)}
+  .phase.tc{border-left-color:var(--c)}
+  .phase.sh{border-left-color:#8794A1}
+  .ph-top{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:8px}
+  .tag{font-family:'Times New Roman',Times,serif;font-size:11.5px;letter-spacing:.08em;padding:3px 9px;border-radius:2px;border:1px solid}
+  .tag.a{color:var(--a-ink);background:var(--a-bg);border-color:#BFD9EA}
+  .tag.b{color:var(--b-ink);background:var(--b-bg);border-color:#F0D2AC}
+  .tag.c{color:var(--c-ink);background:var(--c-bg);border-color:#BCE0BC}
+  .tag.n{color:#4C5762;background:#F1F4F6;border-color:#D7DEE4}
+  .wks{font-family:'Times New Roman',Times,serif;font-size:12px;color:var(--muted);margin-left:auto}
+  .phase h3{font-family:'Times New Roman',Times,serif;font-weight:600;font-size:21px;margin:2px 0 4px}
+  .goal{font-family:'Times New Roman',Times,serif;font-style:italic;font-size:16px;color:#46525E;margin-bottom:14px}
+  .learn{list-style:none;margin:0 0 4px}
+  .learn li{position:relative;padding-left:20px;margin:8px 0;font-size:15px}
+  .learn li::before{content:"–";position:absolute;left:2px;color:#8B97A3}
+  code{font-family:'Times New Roman',Times,serif;font-size:.85em;background:#F1F5F8;border:1px solid #E0E8EE;border-radius:3px;padding:1px 5px}
+  .ship{border:1px dashed #B9C6D0;background:#FAFCFD;border-radius:3px;padding:12px 16px;margin:16px 0 4px;font-size:15px}
+  .ship .lbl{font-family:'Times New Roman',Times,serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:4px;color:var(--a-ink)}
+  .phase.tb .ship .lbl{color:var(--b-ink)}
+  .phase.tc .ship .lbl{color:var(--c-ink)}
+  .phase.sh .ship .lbl{color:#4C5762}
+  .mats{margin-top:16px;border-top:1px dotted #C9D3DC;padding-top:12px}
+  .mats .lbl{font-family:'Times New Roman',Times,serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+  .mats ul{list-style:none;margin:0}
+  .mats li{display:flex;gap:12px;align-items:baseline;margin:7px 0;font-size:14.5px}
+  .mats .verb{font-family:'Times New Roman',Times,serif;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#7B8794;flex:none;width:50px;text-align:right}
+  .mats .mb{flex:1;min-width:0}
+  .mats .note{color:var(--muted)}
+
+  /* ---------- exit criteria ---------- */
+  .grp{background:#fff;border:1px solid var(--line);border-radius:3px;padding:18px 22px;margin-bottom:14px}
+  .grp h3{font-family:'Times New Roman',Times,serif;font-weight:600;font-size:18px;margin-bottom:8px}
+  .grp label{display:flex;gap:10px;align-items:flex-start;margin:9px 0;font-size:15px;cursor:pointer}
+  .grp input{margin-top:4px;width:15px;height:15px;flex:none;accent-color:var(--a)}
+  .grp.gb input{accent-color:var(--b)}
+  .grp.gc input{accent-color:var(--c)}
+
+  /* ---------- beyond ---------- */
+  .beyond-intro{font-size:15px;color:#3D4854;margin-bottom:16px}
+  .beyond{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .bx{background:#fff;border:1px solid var(--line);border-top:3px solid #8794A1;border-radius:3px;padding:16px 18px}
+  .bx h3{font-family:'Times New Roman',Times,serif;font-weight:600;font-size:17px;margin-bottom:5px}
+  .bx p{font-size:14px;color:#3D4854}
+  .bx .go{margin-top:8px;font-size:13.5px;color:var(--muted)}
+  @media (max-width:700px){.beyond{grid-template-columns:1fr}}
+
+  /* ---------- references ---------- */
+  .refs ol{list-style:none;counter-reset:r}
+  .refs li{counter-increment:r;position:relative;padding-left:46px;margin:9px 0;font-size:14.5px}
+  .refs li::before{content:"[" counter(r) "]";position:absolute;left:0;font-family:'Times New Roman',Times,serif;font-size:13px;color:var(--muted)}
+  .refs .src{color:var(--muted)}
+
+</style>
+</head>
+<body>
+<div class="topline" aria-hidden="true"></div>
+<div class="wrap">
+
+  <!-- ================= HEADER ================= -->
+  <header>
+    <div class="eyebrow">cs.LG · self-study curriculum · rev 1.1 — jul 2026</div>
+    <h1>Fine-Tuning, Retrieval-Augmented Generation &amp; Deployment</h1>
+    <div class="byline">A 14-week practitioner's plan · three tracks · eight checkpoints · ≈ 8–10 h / week</div>
+    <div class="abstract">
+      <p><span class="lbl">Abstract</span>This curriculum takes you from a working understanding of transformers to three production skills: adapting open-weight models with supervised and preference-based fine-tuning (<strong>Track A</strong>), grounding any model in your own data with retrieval-augmented generation (<strong>Track B</strong>), and turning open-weight models into fast, observable endpoints you can afford to run (<strong>Track C</strong>). Fourteen weeks, eight checkpoints — every one of them a shipped artifact, because the model you trained and the retriever you measured are the only proof of learning that counts.</p>
+    </div>
+    <nav class="toc" aria-label="Contents">
+      <a href="#tracks">§1 Tracks</a>
+      <a href="#cadence">§2 How to run it</a>
+      <a href="#checkpoints">§3 Checkpoints 00–07</a>
+      <a href="#exit">§4 Exit criteria</a>
+      <a href="#beyond">§5 Beyond</a>
+      <a href="#refs">§6 References</a>
+    </nav>
+  </header>
+
+  <!-- ================= FIGURE 1 ================= -->
+  <figure class="figure">
+    <svg viewBox="0 0 760 380" role="img" aria-labelledby="fig1title">
+      <title id="fig1title">Planned proficiency by week for the fine-tuning, RAG, and deployment tracks, with all three curves sharing one origin at week 0 and converging to a single point at the week-14 capstone.</title>
+
+      <!-- plot frame -->
+      <rect x="64" y="24" width="656" height="296" fill="none" stroke="#D9E1E8" stroke-width="1"/>
+
+      <!-- horizontal gridlines -->
+      <line x1="64" y1="110" x2="720" y2="110" stroke="#E6EBF0" stroke-dasharray="2 4"/>
+      <line x1="64" y1="180" x2="720" y2="180" stroke="#E6EBF0" stroke-dasharray="2 4"/>
+      <line x1="64" y1="250" x2="720" y2="250" stroke="#E6EBF0" stroke-dasharray="2 4"/>
+
+      <!-- vertical gridlines at even weeks -->
+      <line x1="158" y1="24" x2="158" y2="320" stroke="#EDF1F5" stroke-dasharray="2 4"/>
+      <line x1="251" y1="24" x2="251" y2="320" stroke="#EDF1F5" stroke-dasharray="2 4"/>
+      <line x1="345" y1="24" x2="345" y2="320" stroke="#EDF1F5" stroke-dasharray="2 4"/>
+      <line x1="439" y1="24" x2="439" y2="320" stroke="#EDF1F5" stroke-dasharray="2 4"/>
+      <line x1="533" y1="24" x2="533" y2="320" stroke="#EDF1F5" stroke-dasharray="2 4"/>
+      <line x1="626" y1="24" x2="626" y2="320" stroke="#EDF1F5" stroke-dasharray="2 4"/>
+
+      <!-- track handoffs -->
+      <line x1="392" y1="24" x2="392" y2="320" stroke="#C3CDD6" stroke-dasharray="4 4"/>
+      <text x="400" y="40" class="ck">A → B</text>
+      <line x1="579" y1="24" x2="579" y2="320" stroke="#C3CDD6" stroke-dasharray="4 4"/>
+      <text x="587" y="40" class="ck">B → C</text>
+
+      <!-- Track C curve (deployment, C2 green) -->
+      <path d="M 64 314 C 130 313, 220 306, 298 300 C 330 297, 362 294, 392 292 C 425 289, 455 287, 486 285 C 520 282, 550 278, 579 268 C 612 256, 645 178, 673 130 C 692 104, 708 86, 720 76"
+            fill="none" stroke="#2CA02C" stroke-width="2.5" stroke-linecap="round"/>
+
+      <!-- Track B curve (RAG, C1 orange) -->
+      <path d="M 64 314 C 100 312, 170 304, 205 298 C 235 294, 268 289, 298 283 C 330 276, 365 264, 392 250 C 425 232, 452 202, 486 176 C 520 150, 548 130, 579 116 C 612 105, 645 102, 673 99 C 690 96, 706 86, 720 76"
+            fill="none" stroke="#FF7F0E" stroke-width="2.5" stroke-linecap="round"/>
+
+      <!-- Track A curve (fine-tuning, C0 blue) -->
+      <path d="M 64 314 C 95 302, 175 252, 205 225 C 240 197, 268 180, 298 166 C 330 152, 362 132, 392 124 C 425 116, 455 113, 486 110 C 520 107, 548 104, 579 100 C 612 97, 645 94, 673 91 C 690 89, 706 83, 720 76"
+            fill="none" stroke="#1F77B4" stroke-width="2.5" stroke-linecap="round"/>
+
+      <!-- shared origin marker, styled like the checkpoint markers -->
+      <circle cx="64" cy="314" r="4.5" fill="#fff" stroke="#5A6673" stroke-width="2.5"/>
+
+      <!-- checkpoint markers: Track A -->
+      <circle cx="111" cy="289" r="4.5" fill="#fff" stroke="#1F77B4" stroke-width="2.5"/>
+      <circle cx="205" cy="225" r="4.5" fill="#fff" stroke="#1F77B4" stroke-width="2.5"/>
+      <circle cx="298" cy="166" r="4.5" fill="#fff" stroke="#1F77B4" stroke-width="2.5"/>
+      <circle cx="392" cy="124" r="4.5" fill="#fff" stroke="#1F77B4" stroke-width="2.5"/>
+      <text x="111" y="274" text-anchor="middle" class="ck">ckpt-00</text>
+      <text x="205" y="211" text-anchor="middle" class="ck">ckpt-01</text>
+      <text x="298" y="152" text-anchor="middle" class="ck">ckpt-02</text>
+      <text x="392" y="106" text-anchor="middle" class="ck">ckpt-03</text>
+
+      <!-- checkpoint markers: Track B -->
+      <circle cx="486" cy="176" r="4.5" fill="#fff" stroke="#FF7F0E" stroke-width="2.5"/>
+      <circle cx="579" cy="116" r="4.5" fill="#fff" stroke="#FF7F0E" stroke-width="2.5"/>
+      <text x="486" y="196" text-anchor="middle" class="ck">ckpt-04</text>
+      <text x="579" y="136" text-anchor="middle" class="ck">ckpt-05</text>
+
+      <!-- checkpoint marker: Track C -->
+      <circle cx="673" cy="130" r="4.5" fill="#fff" stroke="#2CA02C" stroke-width="2.5"/>
+      <text x="673" y="150" text-anchor="middle" class="ck">ckpt-06</text>
+
+      <!-- capstone markers -->
+      <rect x="712.5" y="68.5" width="15" height="15" transform="rotate(45 720 76)" fill="#fff" stroke="#1F77B4" stroke-width="2"/>
+      <rect x="715" y="71" width="10" height="10" transform="rotate(45 720 76)" fill="none" stroke="#FF7F0E" stroke-width="2"/>
+      <rect x="717.5" y="73.5" width="5" height="5" transform="rotate(45 720 76)" fill="#2CA02C" stroke="none"/>
+      <text x="712" y="56" text-anchor="end" class="ck">ckpt-07 · capstone</text>
+
+      <!-- legend -->
+      <rect x="84" y="42" width="238" height="82" fill="#fff" stroke="#DCE3EA"/>
+      <line x1="98" y1="62" x2="128" y2="62" stroke="#1F77B4" stroke-width="2.5"/>
+      <line x1="98" y1="84" x2="128" y2="84" stroke="#FF7F0E" stroke-width="2.5"/>
+      <line x1="98" y1="106" x2="128" y2="106" stroke="#2CA02C" stroke-width="2.5"/>
+      <text x="138" y="66" class="ax">Track A · fine-tuning</text>
+      <text x="138" y="88" class="ax">Track B · RAG</text>
+      <text x="138" y="110" class="ax">Track C · deployment</text>
+
+      <!-- x-axis ticks + labels -->
+      <line x1="64" y1="320" x2="64" y2="326" stroke="#9AA6B2"/>
+      <line x1="158" y1="320" x2="158" y2="326" stroke="#9AA6B2"/>
+      <line x1="251" y1="320" x2="251" y2="326" stroke="#9AA6B2"/>
+      <line x1="345" y1="320" x2="345" y2="326" stroke="#9AA6B2"/>
+      <line x1="439" y1="320" x2="439" y2="326" stroke="#9AA6B2"/>
+      <line x1="533" y1="320" x2="533" y2="326" stroke="#9AA6B2"/>
+      <line x1="626" y1="320" x2="626" y2="326" stroke="#9AA6B2"/>
+      <line x1="720" y1="320" x2="720" y2="326" stroke="#9AA6B2"/>
+      <text x="64" y="342" text-anchor="middle" class="ax">0</text>
+      <text x="158" y="342" text-anchor="middle" class="ax">2</text>
+      <text x="251" y="342" text-anchor="middle" class="ax">4</text>
+      <text x="345" y="342" text-anchor="middle" class="ax">6</text>
+      <text x="439" y="342" text-anchor="middle" class="ax">8</text>
+      <text x="533" y="342" text-anchor="middle" class="ax">10</text>
+      <text x="626" y="342" text-anchor="middle" class="ax">12</text>
+      <text x="720" y="342" text-anchor="middle" class="ax">14</text>
+      <text x="392" y="366" text-anchor="middle" class="ax">weeks</text>
+
+      <!-- y-axis label -->
+      <text x="46" y="172" text-anchor="middle" transform="rotate(-90 46 172)" class="ax">proficiency →</text>
+    </svg>
+    <figcaption class="figcap">Figure 1 — Planned proficiency by week. Markers are checkpoints: each one is a project you ship, not a chapter you finish. Focus hands off A → B at week&nbsp;7 and B → C at week&nbsp;11. Deployment skill starts accruing back at ckpt-02 — the first time you serve your own weights — then compounds in ckpt-06. All three tracks leave from a single origin and meet again at a single point: the capstone (ckpt-07).</figcaption>
+  </figure>
+
+  <!-- ================= §1 TRACKS ================= -->
+  <section class="sec" id="tracks">
+    <div class="sec-head"><span class="sec-no">§1</span><h2>Three tracks, one system</h2></div>
+    <div class="tracks">
+      <div class="track">
+        <span class="mono-tag ta">Track A · weeks 0–7</span>
+        <h3>Fine-tuning</h3>
+        <p>Change what a model <em>is</em>: its format, style, domain fluency, and behavior. You will move from full supervised fine-tuning on small models to QLoRA on 7–8B models to preference tuning with DPO — always on hardware you can actually get.</p>
+      </div>
+      <div class="track b">
+        <span class="mono-tag tb">Track B · weeks 7–11</span>
+        <h3>Retrieval-augmented generation</h3>
+        <p>Change what a model <em>knows</em> at answer time: fresh, private, or long-tail facts fetched from your own corpus. You will build the pipeline by hand first — embeddings, chunking, vector search — then make it trustworthy with hybrid retrieval, reranking, and evals.</p>
+      </div>
+      <div class="track c">
+        <span class="mono-tag tc">Track C · weeks 11–13</span>
+        <h3>Deployment</h3>
+        <p>Change what a model <em>costs to run</em>: the same weights can stream in 200&nbsp;ms or crawl, depending on the engine. You will go from Ollama on your laptop to vLLM/SGLang endpoints with continuous batching and quantized serving — and a latency/cost table you measured yourself.</p>
+      </div>
+      <div class="converge"><strong>Why all three:</strong> in production they split the work — fine-tuning teaches the model <em>how to behave</em>, retrieval supplies <em>what is true right now</em>, and deployment decides whether anyone can afford to use it. The capstone wires your tuned model into your measured retriever on a serving stack you benchmarked — exactly the shape of most real LLM systems.</div>
+    </div>
+  </section>
+
+  <!-- ================= §2 CADENCE ================= -->
+  <section class="sec" id="cadence">
+    <div class="sec-head"><span class="sec-no">§2</span><h2>How to run this plan</h2></div>
+    <ul class="rules">
+      <li><strong>Cadence.</strong> Three sessions a week: one for reading and theory, two at the keyboard. Roughly 8–10 hours total; the week ranges below stretch gracefully if you have less.</li>
+      <li><strong>The ship rule.</strong> Never end a checkpoint without a runnable artifact in a Git repo — a training script, a merged model, an eval report. If nothing shipped, the checkpoint isn't done.</li>
+      <li><strong>Keep a lab notebook.</strong> One markdown file per checkpoint: what you ran, hyperparameters, what broke, what you'd change. This becomes your portfolio narrative for free.</li>
+      <li><strong>Pin your versions.</strong> Freeze a <code>requirements.txt</code> the day you start each project. This stack moves fast, and half of all "bugs" are silent library upgrades.</li>
+    </ul>
+    <table class="hw">
+      <thead><tr><th>Hardware you have</th><th>What it handles in this plan</th></tr></thead>
+      <tbody>
+        <tr><td>No GPU (laptop only)</td><td>All of Track B — RAG runs fine on CPU with API or local quantized models — plus the llama.cpp / Ollama half of Track C, and every reading week.</td></tr>
+        <tr><td>Colab free / Kaggle (T4 16 GB)</td><td>ckpt-01 SFT on 0.5–3B models; ckpt-02 QLoRA on 7–8B models at short context. Enough for the whole plan, with patience.</td></tr>
+        <tr><td>Colab Pro (L4 / A100)</td><td>Comfortable QLoRA and DPO on 7–8B, longer context, faster iterations.</td></tr>
+        <tr><td>Local 24 GB (3090 / 4090)</td><td>Everything here, offline, including serving your merged model with vLLM.</td></tr>
+        <tr><td>Rented (RunPod, Lambda)</td><td>Burst capacity for ckpt-03 preference runs and ckpt-06 serving experiments — a few dollars per session.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ================= §3 CHECKPOINTS ================= -->
+  <section class="sec" id="checkpoints">
+    <div class="sec-head"><span class="sec-no">§3</span><h2>The checkpoints</h2></div>
+
+    <!-- ckpt-00 -->
+    <article class="phase sh">
+      <div class="ph-top">
+        <span class="tag n">ckpt-00</span><span class="tag n">shared</span>
+        <span class="wks">weeks 0–1</span>
+      </div>
+      <h3>Foundations refresh</h3>
+      <p class="goal">Make sure the transformer isn't a black box before you start bending it.</p>
+      <ul class="learn">
+        <li>Transformer anatomy — tokens, embeddings, attention, the KV cache — at the depth needed to reason about memory use and context limits, not to derive the math.</li>
+        <li>The adaptation ladder: prompting → RAG → fine-tuning, and the question that routes every project: <em>is the gap in the model's knowledge, or in its behavior?</em></li>
+        <li>The Hugging Face stack: <code>transformers</code>, <code>datasets</code>, <code>tokenizers</code>; loading a small model and watching what the tokenizer actually does to your text.</li>
+      </ul>
+      <div class="ship"><span class="lbl">Ship →</span>A notebook that loads a small open model (Qwen 2.5 0.5B or Llama 3.2 1B), inspects its tokenizer on tricky inputs, generates with three sampling settings, and logs VRAM use for each. Already fluent? Pass this in one sitting and move on.</div>
+      <div class="mats"><span class="lbl">Materials</span>
+        <ul>
+          <li><span class="verb">watch</span><span class="mb"><a href="https://www.youtube.com/watch?v=kCc8FmEb1nY">Karpathy — "Let's build GPT: from scratch"</a> <span class="note">— the best two hours on what a transformer actually computes</span></span></li>
+          <li><span class="verb">watch</span><span class="mb"><a href="https://www.3blue1brown.com/lessons/attention">3Blue1Brown — Attention in transformers</a> <span class="note">— visual intuition before any code</span></span></li>
+          <li><span class="verb">read</span><span class="mb"><a href="https://jalammar.github.io/illustrated-transformer/">Alammar — The Illustrated Transformer</a> <span class="note">— the canonical diagram walkthrough</span></span></li>
+          <li><span class="verb">work</span><span class="mb"><a href="https://huggingface.co/learn/llm-course">Hugging Face LLM Course, ch. 1–2</a> <span class="note">— the transformers / datasets stack, hands-on</span></span></li>
+          <li><span class="verb">work</span><span class="mb"><a href="https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/overview">Anthropic — Prompt engineering guide</a> <span class="note">— the first rung of the ladder; exhaust it before any heavier tool</span></span></li>
+          <li><span class="verb">do</span><span class="mb"><a href="https://tiktokenizer.vercel.app">Tiktokenizer</a> <span class="note">— paste tricky strings and watch how they tokenize</span></span></li>
+          <li><span class="verb">skim</span><span class="mb"><a href="https://huggingface.co/docs/transformers/quicktour">Transformers quicktour</a> <span class="note">— pipeline, AutoModel, generate()</span></span></li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- ckpt-01 -->
+    <article class="phase">
+      <div class="ph-top">
+        <span class="tag a">ckpt-01</span><span class="tag a">track A</span>
+        <span class="wks">weeks 1–3</span>
+      </div>
+      <h3>Supervised fine-tuning</h3>
+      <p class="goal">Take a base model and teach it to follow instructions in your format.</p>
+      <ul class="learn">
+        <li>Full fine-tuning mechanics: cross-entropy loss on next tokens, learning-rate schedules, epochs vs. overfitting, and catastrophic forgetting — what it looks like and how to notice it early.</li>
+        <li>Chat templates and dataset formats (Alpaca, ShareGPT); masking prompts so you train only on completions; why 1,000 clean examples beat 50,000 scraped ones — and how synthetic pipelines (generate → filter → refine) produce them at scale.</li>
+        <li>TRL's <code>SFTTrainer</code> end to end: packing, effective batch size via gradient accumulation, checkpoint saving and resuming.</li>
+      </ul>
+      <div class="ship"><span class="lbl">Ship →</span>An SFT run on a 1–3B model over 1–5k instruction pairs (a Dolly-15k subset, or pairs you wrote for a task you care about). Compare base vs. tuned on 20 held-out prompts and record the diff in your lab notebook.</div>
+      <div class="mats"><span class="lbl">Materials</span>
+        <ul>
+          <li><span class="verb">work</span><span class="mb"><a href="https://huggingface.co/learn/llm-course/chapter3/1">HF LLM Course, ch. 3 — fine-tuning</a> <span class="note">— the training loop end to end</span></span></li>
+          <li><span class="verb">read</span><span class="mb"><a href="https://huggingface.co/docs/trl/sft_trainer">TRL SFTTrainer guide</a> <span class="note">— packing, completion-only loss, the knobs you'll actually turn</span></span></li>
+          <li><span class="verb">read</span><span class="mb"><a href="https://huggingface.co/docs/transformers/chat_templating">Chat templates</a> <span class="note">— where silent formatting bugs live</span></span></li>
+          <li><span class="verb">use</span><span class="mb"><a href="https://huggingface.co/datasets/databricks/databricks-dolly-15k">databricks-dolly-15k</a> <span class="note">— clean instruction pairs to subset for the ship goal</span></span></li>
+          <li><span class="verb">skim</span><span class="mb"><a href="https://arxiv.org/abs/2212.10560">Self-Instruct paper</a> <span class="note">— where the synthetic-instruction recipe started</span></span></li>
+          <li><span class="verb">read</span><span class="mb"><a href="https://www.manning.com/books/build-a-large-language-model-from-scratch">Raschka — Build an LLM (From Scratch), ch. 6–7</a> <span class="note">— with runnable <a href="https://github.com/rasbt/LLMs-from-scratch">companion code</a></span></span></li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- ckpt-02 -->
+    <article class="phase">
+      <div class="ph-top">
+        <span class="tag a">ckpt-02</span><span class="tag a">track A</span>
+        <span class="wks">weeks 3–5</span>
+      </div>
+      <h3>PEFT: LoRA, QLoRA &amp; quantization</h3>
+      <p class="goal">Fine-tune 7–8B models on one GPU by touching less than 1% of the weights.</p>
+      <ul class="learn">
+        <li>The VRAM ledger — weights + gradients + optimizer states + activations — and why full fine-tuning of a 7B model wants a cluster while QLoRA fits on a free Colab T4.</li>
+        <li>LoRA's moving parts: rank <code>r</code>, <code>alpha</code>, dropout, target modules; what merging adapters back into the base actually does.</li>
+        <li>QLoRA specifically: 4-bit NF4 storage, double quantization, paged optimizers — training through a frozen quantized base.</li>
+        <li>The inference-quantization landscape as a separate concern: GGUF / llama.cpp for local serving, GPTQ and AWQ for GPUs; plus the shortcut tools worth knowing — Unsloth, Axolotl, LLaMA-Factory.</li>
+      </ul>
+      <div class="ship"><span class="lbl">Ship →</span>A QLoRA fine-tune of a 7–8B model (Llama 3.1 8B or Qwen 2.5 7B) on a domain dataset. Merge the adapter, export to GGUF, and serve it locally through Ollama so someone else could pull and run your model. Quietly, this is also your first rep of Track C.</div>
+      <div class="mats"><span class="lbl">Materials</span>
+        <ul>
+          <li><span class="verb">read</span><span class="mb"><a href="https://arxiv.org/abs/2106.09685">LoRA paper</a> <span class="note">— §1–4 suffice; the idea fits on a napkin</span></span></li>
+          <li><span class="verb">read</span><span class="mb"><a href="https://arxiv.org/abs/2305.14314">QLoRA paper</a> <span class="note">— focus on NF4 and paged optimizers</span></span></li>
+          <li><span class="verb">work</span><span class="mb"><a href="https://docs.unsloth.ai">Unsloth docs &amp; notebooks</a> <span class="note">— free-Colab-sized QLoRA runs</span></span></li>
+          <li><span class="verb">read</span><span class="mb"><a href="https://magazine.sebastianraschka.com/p/practical-tips-for-finetuning-llms">Raschka — Practical tips for finetuning with LoRA</a> <span class="note">— rank and alpha choices, backed by experiments</span></span></li>
+          <li><span class="verb">skim</span><span class="mb"><a href="https://huggingface.co/docs/peft/conceptual_guides/lora">PEFT LoRA guide</a> <span class="note">— the API you'll import</span></span></li>
+          <li><span class="verb">do</span><span class="mb"><a href="https://github.com/ollama/ollama">Ollama</a> <span class="note">— import your merged GGUF and serve it</span></span></li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- ckpt-03 -->
+    <article class="phase">
+      <div class="ph-top">
+        <span class="tag a">ckpt-03</span><span class="tag a">track A</span>
+        <span class="wks">weeks 5–7</span>
+      </div>
+      <h3>Preference tuning &amp; evaluation</h3>
+      <p class="goal">Align the model's behavior with preferences — then prove the fine-tune actually helped.</p>
+      <ul class="learn">
+        <li>RLHF at concept level — reward models, PPO — and why practitioners now mostly reach for direct methods instead.</li>
+        <li>DPO and its siblings (ORPO, KTO): preference pairs, the <code>beta</code> knob, the role of the reference model.</li>
+        <li>Evaluation beyond loss curves: <code>lm-evaluation-harness</code> for standard benchmarks; LLM-as-judge and its biases (position, verbosity); building a small golden set for <em>your</em> task, which matters more than any leaderboard.</li>
+      </ul>
+      <div class="ship"><span class="lbl">Ship →</span>A DPO pass on top of your ckpt-02 model using a preference dataset (an UltraFeedback subset works). Then an eval report: SFT vs. DPO on your golden set with a judge prompt, including the cases where DPO made things worse.</div>
+      <div class="mats"><span class="lbl">Materials</span>
+        <ul>
+          <li><span class="verb">read</span><span class="mb"><a href="https://arxiv.org/abs/2305.18290">DPO paper</a> <span class="note">— the trick: your language model is secretly a reward model</span></span></li>
+          <li><span class="verb">work</span><span class="mb"><a href="https://huggingface.co/docs/trl/dpo_trainer">TRL DPOTrainer</a> <span class="note">— beta, reference models, the training loop</span></span></li>
+          <li><span class="verb">read</span><span class="mb"><a href="https://huggingface.co/blog/dpo-trl">HF — Fine-tune Llama 2 with DPO</a> <span class="note">— an end-to-end recipe to adapt</span></span></li>
+          <li><span class="verb">use</span><span class="mb"><a href="https://huggingface.co/datasets/HuggingFaceH4/ultrafeedback_binarized">ultrafeedback_binarized</a> <span class="note">— ready-made preference pairs</span></span></li>
+          <li><span class="verb">read</span><span class="mb"><a href="https://arxiv.org/abs/2306.05685">Judging LLM-as-a-Judge (MT-Bench)</a> <span class="note">— the judge biases you must design around</span></span></li>
+          <li><span class="verb">work</span><span class="mb"><a href="https://github.com/EleutherAI/lm-evaluation-harness">lm-evaluation-harness</a> <span class="note">— run two or three benchmarks pre/post</span></span></li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- ckpt-04 -->
+    <article class="phase tb">
+      <div class="ph-top">
+        <span class="tag b">ckpt-04</span><span class="tag b">track B</span>
+        <span class="wks">weeks 7–9</span>
+      </div>
+      <h3>RAG from first principles</h3>
+      <p class="goal">Build retrieval before you install a framework — every component by hand, once.</p>
+      <ul class="learn">
+        <li>Ingestion before intelligence: parsing real-world PDFs, HTML, and tables into clean text — the unglamorous step where production RAG quality is won or lost.</li>
+        <li>Embeddings: bi-encoders, cosine similarity, the MTEB leaderboard as a menu; running <code>sentence-transformers</code> models locally.</li>
+        <li>Chunking — fixed, recursive, structure-aware, semantic; overlap — and why chunking choices move answer quality more than the choice of vector database.</li>
+        <li>Vector stores and approximate search: FAISS, Chroma, Qdrant, pgvector; HNSW in one diagram; when brute force is honestly fine.</li>
+        <li>The naive pipeline — ingest → chunk → embed → top-k → stuff context → generate with citations — and its classic failure modes: wrong chunks, lost context, confident answers with no support.</li>
+      </ul>
+      <div class="ship"><span class="lbl">Ship →</span>A from-scratch RAG CLI over your own PDFs or notes: <code>sentence-transformers</code> + FAISS + any chat model (your ckpt-02 model in Ollama closes the loop). Then rebuild the same tool in LlamaIndex and write down what the framework was hiding from you.</div>
+      <div class="mats"><span class="lbl">Materials</span>
+        <ul>
+          <li><span class="verb">skim</span><span class="mb"><a href="https://arxiv.org/abs/2005.11401">Lewis et al. — the original RAG paper</a> <span class="note">— for framing; the field moved, the shape didn't</span></span></li>
+          <li><span class="verb">work</span><span class="mb"><a href="https://sbert.net">sentence-transformers quickstart</a> <span class="note">— embed and compare in ten lines; pick your model off the <a href="https://huggingface.co/spaces/mteb/leaderboard">MTEB leaderboard</a></span></span></li>
+          <li><span class="verb">work</span><span class="mb"><a href="https://github.com/langchain-ai/rag-from-scratch">LangChain — RAG from scratch</a> <span class="note">— short videos and notebooks matching this checkpoint's ethos</span></span></li>
+          <li><span class="verb">read</span><span class="mb"><a href="https://www.pinecone.io/learn/chunking-strategies/">Pinecone — Chunking strategies</a> <span class="note">— the decision that moves your numbers most</span></span></li>
+          <li><span class="verb">skim</span><span class="mb"><a href="https://github.com/docling-project/docling">Docling</a> <span class="note">— layout-aware parsing for the PDFs and tables you will actually meet</span></span></li>
+          <li><span class="verb">skim</span><span class="mb"><a href="https://github.com/facebookresearch/faiss/wiki">FAISS wiki</a> <span class="note">— index types, and when flat brute force is honestly fine</span></span></li>
+          <li><span class="verb">work</span><span class="mb"><a href="https://docs.llamaindex.ai">LlamaIndex starter tutorial</a> <span class="note">— for the framework rebuild</span></span></li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- ckpt-05 -->
+    <article class="phase tb">
+      <div class="ph-top">
+        <span class="tag b">ckpt-05</span><span class="tag b">track B</span>
+        <span class="wks">weeks 9–11</span>
+      </div>
+      <h3>Advanced retrieval &amp; RAG evals</h3>
+      <p class="goal">Take retrieval from "demo" to "trustworthy" — and measure the difference.</p>
+      <ul class="learn">
+        <li>Hybrid search: BM25 + dense vectors fused with reciprocal rank fusion; metadata filtering as the cheapest big win.</li>
+        <li>Rerankers as a second stage: cross-encoders (<code>bge-reranker</code>, Cohere Rerank) reordering a wide candidate set.</li>
+        <li>Query transforms — multi-query, HyDE, decomposition — plus small-to-big / parent-document retrieval and contextual retrieval for chunks that need their surroundings.</li>
+        <li>RAG evaluation: faithfulness, answer relevancy, context precision and recall in the RAGAS style; building a 30–50 question golden set; a sober look at when GraphRAG or agentic retrieval earns its complexity.</li>
+      </ul>
+      <div class="ship"><span class="lbl">Ship →</span>Your ckpt-04 system upgraded with hybrid search + a reranker, an eval harness over your golden set, and a before/after table quantifying the lift. If a fancy technique doesn't move your numbers, the notebook says so.</div>
+      <div class="mats"><span class="lbl">Materials</span>
+        <ul>
+          <li><span class="verb">read</span><span class="mb"><a href="https://www.anthropic.com/news/contextual-retrieval">Anthropic — Introducing Contextual Retrieval</a> <span class="note">— with failure-rate numbers to beat</span></span></li>
+          <li><span class="verb">read</span><span class="mb"><a href="https://weaviate.io/blog/hybrid-search-explained">Weaviate — Hybrid search explained</a> <span class="note">— BM25 + dense + reciprocal rank fusion</span></span></li>
+          <li><span class="verb">use</span><span class="mb"><a href="https://huggingface.co/BAAI/bge-reranker-v2-m3">bge-reranker-v2-m3</a> <span class="note">— a drop-in cross-encoder second stage</span></span></li>
+          <li><span class="verb">read</span><span class="mb"><a href="https://arxiv.org/abs/2212.10496">HyDE paper</a> <span class="note">— hypothetical documents for hard queries</span></span></li>
+          <li><span class="verb">work</span><span class="mb"><a href="https://docs.ragas.io">RAGAS</a> <span class="note">— faithfulness and context metrics over your golden set</span></span></li>
+          <li><span class="verb">skim</span><span class="mb"><a href="https://microsoft.github.io/graphrag/">Microsoft GraphRAG</a> <span class="note">— know when graphs earn their complexity</span></span></li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- ckpt-06 -->
+    <article class="phase tc">
+      <div class="ph-top">
+        <span class="tag c">ckpt-06</span><span class="tag c">track C</span>
+        <span class="wks">weeks 11–13</span>
+      </div>
+      <h3>Serving &amp; deployment</h3>
+      <p class="goal">Turn model files into a fast, cheap, observable endpoint.</p>
+      <ul class="learn">
+        <li>The serving landscape and when each engine fits: <code>llama.cpp</code> / Ollama for laptops and edge boxes; vLLM and SGLang for production GPUs — PagedAttention, RadixAttention, continuous batching; TensorRT-LLM when you're squeezing the last drop out of NVIDIA silicon.</li>
+        <li>The four numbers of inference — time-to-first-token, inter-token latency, throughput, cost per million tokens — and how batch size trades them against each other.</li>
+        <li>Speed levers: prefix caching, speculative decoding, chunked prefill, tensor parallelism across GPUs; quantized-serving tradeoffs (GGUF vs. AWQ/GPTQ vs. FP8) chosen per target hardware.</li>
+        <li>Packaging: an OpenAI-compatible endpoint with streaming, inside Docker with the GPU runtime; serverless GPU platforms (Modal, RunPod) vs. renting a box; structured output via grammar-constrained decoding.</li>
+        <li>Ops before users arrive: load testing your endpoint, autoscaling and cold starts, rate limits and basic guardrails.</li>
+      </ul>
+      <div class="ship"><span class="lbl">Ship →</span>Deploy your ckpt-03 model twice. Local: GGUF through llama.cpp / Ollama. Production: vLLM or SGLang behind a Dockerized, OpenAI-compatible streaming endpoint on a serverless GPU platform. Load-test both and publish the table — TTFT, tokens/s, and $/1M tokens at three quantization levels.</div>
+      <div class="mats"><span class="lbl">Materials</span>
+        <ul>
+          <li><span class="verb">work</span><span class="mb"><a href="https://docs.vllm.ai">vLLM docs</a> <span class="note">— quickstart plus the OpenAI-compatible server; your production default</span></span></li>
+          <li><span class="verb">read</span><span class="mb"><a href="https://www.databricks.com/blog/llm-inference-performance-engineering-best-practices">Databricks — LLM Inference Performance Engineering</a> <span class="note">— TTFT, inter-token latency, and batching, with numbers</span></span></li>
+          <li><span class="verb">work</span><span class="mb"><a href="https://docs.sglang.ai">SGLang docs</a> <span class="note">— RadixAttention; benchmark it against vLLM on your workload</span></span></li>
+          <li><span class="verb">skim</span><span class="mb"><a href="https://github.com/ggml-org/llama.cpp">llama.cpp</a> <span class="note">— GGUF quant levels for the local deploy</span></span></li>
+          <li><span class="verb">work</span><span class="mb"><a href="https://modal.com/docs">Modal docs</a> <span class="note">— the serverless GPU path for the ship goal</span></span></li>
+          <li><span class="verb">skim</span><span class="mb"><a href="https://github.com/dottxt-ai/outlines">Outlines</a> <span class="note">— grammar-constrained structured output</span></span></li>
+        </ul>
+      </div>
+    </article>
+
+    <!-- ckpt-07 -->
+    <article class="phase sh">
+      <div class="ph-top">
+        <span class="tag n">ckpt-07</span><span class="tag a">track A</span><span class="tag b">track B</span><span class="tag c">track C</span>
+        <span class="wks">weeks 13–14+</span>
+      </div>
+      <h3>Capstone: a domain assistant</h3>
+      <p class="goal">Wire all three tracks into one deployed system — tuned voice, retrieved knowledge, measured serving.</p>
+      <ul class="learn">
+        <li>Division of labor in real systems: fine-tune for format, style, and tool use; retrieve for facts that change; why baking knowledge into weights is usually the wrong call.</li>
+        <li>Choosing the ckpt-06 serving recipe for <em>this</em> workload — latency budget, expected concurrency, GPU spend — written down before you deploy.</li>
+        <li>Production hygiene: response caching, guardrails — including prompt-injection defenses for anything your retriever feeds the model — monitoring for drift, and a plan for re-indexing when the corpus updates.</li>
+      </ul>
+      <div class="ship"><span class="lbl">Ship →</span>The capstone: a domain assistant for a corpus you care about — your ckpt-03 model on your ckpt-06 serving stack, your ckpt-05 retrieval pipeline behind a FastAPI endpoint, the eval suite in CI, and a one-page report covering quality <em>and</em> latency/cost. This repo is the portfolio piece.</div>
+      <div class="mats"><span class="lbl">Materials</span>
+        <ul>
+          <li><span class="verb">read</span><span class="mb"><a href="https://huyenchip.com/books/">Huyen — AI Engineering</a> <span class="note">— especially the evaluation and inference chapters</span></span></li>
+          <li><span class="verb">read</span><span class="mb"><a href="https://eugeneyan.com/writing/llm-patterns/">Yan — Patterns for LLM Systems &amp; Products</a> <span class="note">— evals, RAG, and guardrails in one map</span></span></li>
+          <li><span class="verb">work</span><span class="mb"><a href="https://fastapi.tiangolo.com">FastAPI</a> <span class="note">— streaming responses for your endpoint</span></span></li>
+        </ul>
+      </div>
+    </article>
+  </section>
+
+  <!-- ================= §4 EXIT CRITERIA ================= -->
+  <section class="sec" id="exit">
+    <div class="sec-head"><span class="sec-no">§4</span><h2>Exit criteria</h2></div>
+    <div class="grp">
+      <h3>Track A — fine-tuning</h3>
+      <label><input type="checkbox"> I can sketch the VRAM ledger for full FT vs. LoRA vs. QLoRA from memory, and pick the right method for a given GPU.</label>
+      <label><input type="checkbox"> A merged GGUF model I trained is published where someone else can pull and run it.</label>
+      <label><input type="checkbox"> My DPO model beats my SFT model on my own golden set — and I can say by how much, and where it regressed.</label>
+    </div>
+    <div class="grp gb">
+      <h3>Track B — RAG</h3>
+      <label><input type="checkbox"> My retriever's context precision and faithfulness are measured numbers, not vibes.</label>
+      <label><input type="checkbox"> I can defend my chunking strategy for a specific corpus and describe two alternatives I rejected.</label>
+      <label><input type="checkbox"> Hybrid search + reranking beats naive top-k on my eval set, and I have the table to show it.</label>
+    </div>
+    <div class="grp gc">
+      <h3>Track C — deployment</h3>
+      <label><input type="checkbox"> I can quote my model's TTFT, tokens/s, and $/1M tokens at two quantization levels — from my own load test, not a blog post.</label>
+      <label><input type="checkbox"> I can explain why continuous batching and prefix caching raise throughput, and when speculative decoding actually helps.</label>
+      <label><input type="checkbox"> A Dockerized, OpenAI-compatible endpoint serving a model I fine-tuned is live where a friend could hit it with an API key.</label>
+    </div>
+    <div class="grp">
+      <h3>Convergence</h3>
+      <label><input type="checkbox"> One deployed endpoint combines my tuned model, my retriever, and a serving stack I chose deliberately — with an eval report a stranger could reproduce.</label>
+    </div>
+  </section>
+
+  <!-- ================= §5 BEYOND ================= -->
+  <section class="sec" id="beyond">
+    <div class="sec-head"><span class="sec-no">§5</span><h2>Beyond the curriculum</h2></div>
+    <p class="beyond-intro">Six areas that sit outside the 14-week clock but will pull on you within your first real project. None needs a dedicated checkpoint — fold each one in the moment it becomes blocking.</p>
+    <div class="beyond">
+      <div class="bx">
+        <h3>Prompt &amp; context engineering</h3>
+        <p>The cheapest lever, and the rung of the adaptation ladder you exhaust before every heavier tool in this plan.</p>
+        <p class="go">Start — <a href="https://www.promptingguide.ai">Prompt Engineering Guide</a></p>
+      </div>
+      <div class="bx">
+        <h3>Agents &amp; tool use</h3>
+        <p>Function calling, multi-step loops, and MCP — where agentic RAG (ckpt-05) and tool-use fine-tuning (ckpt-07) both lead.</p>
+        <p class="go">Start — <a href="https://www.anthropic.com/research/building-effective-agents">Building Effective Agents</a> · <a href="https://modelcontextprotocol.io">MCP</a></p>
+      </div>
+      <div class="bx">
+        <h3>Security &amp; prompt injection</h3>
+        <p>Your retriever ingests documents, and documents can carry adversarial instructions — the top practical vulnerability in RAG and agent systems.</p>
+        <p class="go">Start — <a href="https://owasp.org/www-project-top-10-for-large-language-model-applications/">OWASP LLM Top 10</a> · <a href="https://simonwillison.net/series/prompt-injection/">Willison's series</a></p>
+      </div>
+      <div class="bx">
+        <h3>Observability &amp; LLMOps</h3>
+        <p>ckpt-03's eval discipline made permanent: tracing, logging, and regression evals running continuously against production traffic.</p>
+        <p class="go">Start — <a href="https://langfuse.com/docs">Langfuse docs</a></p>
+      </div>
+      <div class="bx">
+        <h3>Synthetic data generation</h3>
+        <p>How most fine-tuning datasets are actually made now: strong models generating, filtering, and refining the pairs Track A trains on.</p>
+        <p class="go">Start — <a href="https://github.com/argilla-io/distilabel">distilabel</a></p>
+      </div>
+      <div class="bx">
+        <h3>The assumed stack</h3>
+        <p>Python, Git, Docker, and Linux fluency. If any of these is shaky, it will tax you more than any LLM concept in this plan.</p>
+        <p class="go">Start — <a href="https://missing.csail.mit.edu">MIT's Missing Semester</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= §6 REFERENCES ================= -->
+  <section class="sec refs" id="refs">
+    <div class="sec-head"><span class="sec-no">§6</span><h2>References</h2></div>
+    <ol>
+      <li><a href="https://karpathy.ai/zero-to-hero.html">Neural Networks: Zero to Hero</a> — A. Karpathy. <span class="src">Video series; "Let's build GPT" is the core session.</span></li>
+      <li><a href="https://jalammar.github.io/illustrated-transformer/">The Illustrated Transformer</a> — J. Alammar. <span class="src">The canonical visual walkthrough.</span></li>
+      <li><a href="https://huggingface.co/learn/llm-course">Hugging Face LLM Course</a>. <span class="src">Free; covers the transformers/datasets stack and fine-tuning.</span></li>
+      <li><a href="https://www.3blue1brown.com/lessons/attention">Attention in Transformers</a> — 3Blue1Brown. <span class="src">Visual intuition for attention.</span></li>
+      <li><a href="https://huggingface.co/docs/trl">TRL documentation</a>. <span class="src">SFTTrainer and DPOTrainer references.</span></li>
+      <li><a href="https://www.manning.com/books/build-a-large-language-model-from-scratch">Build a Large Language Model (From Scratch)</a> — S. Raschka. <span class="src">Best single book for training mechanics.</span></li>
+      <li><a href="https://arxiv.org/abs/2106.09685">LoRA: Low-Rank Adaptation of Large Language Models</a> — Hu et al., 2021.</li>
+      <li><a href="https://arxiv.org/abs/2305.14314">QLoRA: Efficient Finetuning of Quantized LLMs</a> — Dettmers et al., 2023.</li>
+      <li><a href="https://docs.unsloth.ai">Unsloth documentation</a>. <span class="src">Fast QLoRA notebooks that fit free Colab.</span></li>
+      <li><a href="https://huggingface.co/docs/peft">PEFT documentation</a>. <span class="src">Adapter configs, merging, target modules.</span></li>
+      <li><a href="https://arxiv.org/abs/2305.18290">Direct Preference Optimization</a> — Rafailov et al., 2023.</li>
+      <li><a href="https://github.com/EleutherAI/lm-evaluation-harness">lm-evaluation-harness</a> — EleutherAI. <span class="src">Standard benchmark runner.</span></li>
+      <li><a href="https://arxiv.org/abs/2005.11401">Retrieval-Augmented Generation for Knowledge-Intensive NLP</a> — Lewis et al., 2020.</li>
+      <li><a href="https://sbert.net">sentence-transformers documentation</a>. <span class="src">Embedding and cross-encoder models.</span></li>
+      <li><a href="https://docs.llamaindex.ai">LlamaIndex documentation</a>. <span class="src">Framework reference plus advanced retrieval guides.</span></li>
+      <li><a href="https://huggingface.co/spaces/mteb/leaderboard">MTEB leaderboard</a>. <span class="src">Choosing an embedding model.</span></li>
+      <li><a href="https://docs.ragas.io">RAGAS documentation</a>. <span class="src">Faithfulness, relevancy, context precision/recall.</span></li>
+      <li><a href="https://www.anthropic.com/news/contextual-retrieval">Introducing Contextual Retrieval</a> — Anthropic. <span class="src">Prepending chunk context before embedding.</span></li>
+      <li><a href="https://docs.vllm.ai">vLLM documentation</a>. <span class="src">PagedAttention, serving your merged model.</span></li>
+      <li><a href="https://huyenchip.com/books/">AI Engineering</a> — C. Huyen. <span class="src">Production framing for all three tracks.</span></li>
+      <li><a href="https://docs.sglang.ai">SGLang documentation</a>. <span class="src">RadixAttention, structured output, high-throughput serving.</span></li>
+      <li><a href="https://github.com/ggml-org/llama.cpp">llama.cpp</a> — ggml-org. <span class="src">GGUF quantization and CPU/edge inference.</span></li>
+      <li><a href="https://www.databricks.com/blog/llm-inference-performance-engineering-best-practices">LLM Inference Performance Engineering</a> — Databricks. <span class="src">TTFT, inter-token latency, and batching tradeoffs, with numbers.</span></li>
+      <li><a href="https://modal.com/docs">Modal documentation</a>. <span class="src">Serverless GPU deployment patterns.</span></li>
+    </ol>
+  </section>
+
+</div>
+</body>
+</html>
